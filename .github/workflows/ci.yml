@@ -1,4 +1,4 @@
-```yaml
+
 name: Portfolio CI/CD
 
 on:
@@ -38,8 +38,7 @@ jobs:
           grep -q 'GitHub Actions' index.html
 
       - name: Build Docker image
-        run: |
-          docker build -t devops-a2:ci .
+        run: docker build -t devops-a2:ci .
 
       - name: Login to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -53,4 +52,3 @@ jobs:
         run: |
           docker tag devops-a2:ci ${{ secrets.DOCKERHUB_USERNAME }}/devops-a2:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops-a2:latest
-```
