@@ -1,0 +1,56 @@
+```yaml
+name: Portfolio CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check required files
+        run: |
+          test -f index.html
+          test -f style.css
+          test -f Dockerfile
+
+      - name: Validate portfolio title
+        run: |
+          grep -q '<title>Rimsha Malik | DevOps Portfolio</title>' index.html
+
+      - name: Validate student roll number
+        run: |
+          grep -q 'FA23-BAI-034' index.html
+
+      - name: Validate DevOps learning section
+        run: |
+          grep -q 'My DevOps Learning Journey' index.html
+          grep -q 'GitHub Actions' index.html
+
+      - name: Build Docker image
+        run: |
+          docker build -t devops-a2:ci .
+
+      - name: Login to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push latest image to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag devops-a2:ci ${{ secrets.DOCKERHUB_USERNAME }}/devops-a2:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops-a2:latest
+```
